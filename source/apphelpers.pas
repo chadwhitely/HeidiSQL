@@ -144,7 +144,7 @@ type
     asUser, asPassword, asWindowsAuth, asLoginPrompt, asPort,
     asPlinkExecutable, asSSHtunnelHost, asSSHtunnelHostPort, asSSHtunnelPort, asSSHtunnelUser,
     asSSHtunnelPassword, asSSHtunnelTimeout, asSSHtunnelPrivateKey, asSSLActive, asSSLKey,
-    asSSLCert, asSSLCA, asSSLCipher, asNetType, asCompressed, asLocalTimeZone, asQueryTimeout, asKeepAlive,
+    asSSLCert, asSSLCA, asSSLCipher, asNetType, asCleartextPasswordEnabled, asCompressed, asLocalTimeZone, asQueryTimeout, asKeepAlive,
     asStartupScriptFilename, asDatabases, asComment, asDatabaseFilter, asTableFilter, asExportSQLCreateDatabases,
     asExportSQLCreateTables, asExportSQLDataHow, asExportSQLDataInsertSize, asExportSQLFilenames, asExportZIPFilenames, asExportSQLDirectories,
     asExportSQLDatabase, asExportSQLServerDatabase, asExportSQLOutput, asExportSQLAddComments, asExportSQLRemoveAutoIncrement,
@@ -451,7 +451,7 @@ begin
   if length(str) > len then
   begin
     str := copy(str, 0, len-1);
-    str := str + '…';
+    str := str + 'ï¿½';
   end;
   result := str;
 end;
@@ -1437,12 +1437,12 @@ begin
     if CreateHTMLHeader then begin
       HTMLContent := 'Version:0.9' + CRLF +
         'StartHTML:000089' + CRLF +
-        'EndHTML:°°°°°°' + CRLF +
+        'EndHTML:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½' + CRLF +
         'StartFragment:000089' + CRLF +
-        'EndFragment:°°°°°°' + CRLF +
+        'EndFragment:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½' + CRLF +
         HTMLContent + CRLF;
       HTMLContent := AnsiStrings.StringReplace(
-        HTMLContent, '°°°°°°',
+        HTMLContent, 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½',
         AnsiStrings.Format('%.6d', [Length(HTMLContent)]),
         [rfReplaceAll]);
     end;
@@ -2627,7 +2627,7 @@ var
   rx: TRegExpr;
   ExeName, SessName, Host, User, Pass, Socket,
   SSLPrivateKey, SSLCACertificate, SSLCertificate, SSLCipher: String;
-  Port, NetType, WindowsAuth, WantSSL: Integer;
+  Port, NetType, WindowsAuth, WantSSL, CleartextPasswordEnabled: Integer;
   AbsentFiles: TStringList;
 
   function GetParamValue(ShortName, LongName: String): String;
@@ -2696,6 +2696,7 @@ begin
   Port := StrToIntDef(GetParamValue('P', 'port'), 0);
   WindowsAuth := StrToIntDef(GetParamValue('W', 'winauth'), -1);
   WantSSL := StrToIntDef(GetParamValue('ssl', 'ssl'), -1);
+  CleartextPasswordEnabled := StrToIntDef(GetParamValue('cleartextPasswordEnabled', 'cleartextPasswordEnabled'), -1);
   SSLPrivateKey := GetParamValue('sslprivatekey', 'sslprivatekey');
   SSLCACertificate := GetParamValue('sslcacertificate', 'sslcacertificate');
   SSLCertificate := GetParamValue('sslcertificate', 'sslcertificate');
@@ -2716,6 +2717,8 @@ begin
     if Host <> '' then ConnectionParams.Hostname := Host;
     if User <> '' then ConnectionParams.Username := User;
     if Pass <> '' then ConnectionParams.Password := Pass;
+    if CleartextPasswordEnabled in [0,1] then
+      ConnectionParams.CleartextPasswordEnabled := Boolean(CleartextPasswordEnabled);
     if Port <> 0 then ConnectionParams.Port := Port;
     if Socket <> '' then begin
       ConnectionParams.Hostname := Socket;
@@ -4276,5 +4279,4 @@ NumberChars := ['0'..'9', FormatSettings.DecimalSeparator, FormatSettings.Thousa
 
 
 end.
-
 
